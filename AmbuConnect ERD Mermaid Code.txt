@@ -1,0 +1,114 @@
+erDiagram
+    USERS ||--|| USER_ROLES : has
+    ROLES ||--o{ USER_ROLES : contains
+    USERS ||--|| DRIVER_PROFILES : has
+    DRIVER_PROFILES ||--o{ AMBULANCES : manages
+    AMBULANCES ||--o{ AMBULANCE_AVAILABILITY : has_status
+    AMBULANCE_TYPES ||--o{ AMBULANCES : categorized_as
+    USERS ||--o{ BOOKING_REQUESTS : requests
+    DRIVER_PROFILES ||--o{ BOOKING_REQUESTS : assigned_to
+    LOCATIONS ||--o{ BOOKING_REQUESTS : pickup_from
+    LOCATIONS ||--o{ BOOKING_REQUESTS : drop_to
+    BOOKING_REQUESTS ||--|| TRIPS : converts_to
+    AMBULANCES ||--o{ TRIPS : used_in
+    TRIPS ||--o{ TRIP_STATUS_HISTORY : tracks
+    TRIPS ||--|| PAYMENTS : generates
+    TRIPS ||--o{ TRIP_LOCATION_TRACKING : logs
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string password
+        string phone
+        datetime created_at
+        datetime updated_at
+    }
+    ROLES {
+        int id PK
+        string name "admin, driver, user"
+    }
+    USER_ROLES {
+        bigint user_id FK "unique"
+        int role_id FK
+        datetime assigned_at
+    }
+    DRIVER_PROFILES {
+        bigint id PK
+        bigint user_id FK "unique"
+        string license_number
+        string cnic
+        datetime created_at
+        datetime updated_at
+    }
+    AMBULANCE_TYPES {
+        int id PK
+        string type "BLS, ALS, ICU"
+        datetime created_at
+    }
+    AMBULANCES {
+        bigint id PK
+        bigint driver_profile_id FK
+        int ambulance_type_id FK
+        string vehicle_number "unique"
+        string model
+        datetime created_at
+        datetime updated_at
+    }
+    AMBULANCE_AVAILABILITY {
+        bigint id PK
+        bigint ambulance_id FK
+        boolean is_available
+        datetime updated_at
+    }
+    BOOKING_REQUESTS {
+        bigint id PK
+        bigint user_id FK
+        bigint driver_profile_id FK "nullable"
+        bigint pickup_location_id FK
+        bigint drop_location_id FK
+        string status "pending, accepted, rejected, cancelled"
+        datetime requested_at
+        datetime updated_at
+    }
+    TRIPS {
+        bigint id PK
+        bigint booking_request_id FK "unique"
+        bigint ambulance_id FK
+        datetime start_time
+        datetime end_time "nullable"
+        decimal fare
+        string status "in_progress, completed, cancelled"
+        datetime created_at
+        datetime updated_at
+    }
+    TRIP_STATUS_HISTORY {
+        bigint id PK
+        bigint trip_id FK
+        string status
+        datetime changed_at
+    }
+    PAYMENTS {
+        bigint id PK
+        bigint trip_id FK "unique"
+        string method "cash, card, online"
+        decimal amount
+        string status "pending, completed, failed"
+        string transaction_id "nullable"
+        string gateway_response "JSON nullable"
+        datetime paid_at
+        datetime created_at
+    }
+    TRIP_LOCATION_TRACKING {
+        bigint id PK
+        bigint trip_id FK
+        double latitude
+        double longitude
+        datetime recorded_at
+    }
+    LOCATIONS {
+        bigint id PK
+        string address
+        double latitude
+        double longitude
+        datetime created_at
+    }
